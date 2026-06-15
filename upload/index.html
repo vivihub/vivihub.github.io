@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>未明シアター｜ドラマLP公開ツール</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --panel:#141418; --line:#26262e; --ink:#e8e6e0;
+    --sub:#8a8a96; --accent:#b8323a; --accent2:#d4af37; --ok:#3fa46a; --ng:#c4474f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .brand .bar{width:4px;height:34px;background:var(--accent)}
+  h1{font-size:22px;letter-spacing:.08em;margin:0;font-weight:700}
+  .lead{color:var(--sub);font-size:13px;margin:4px 0 28px;letter-spacing:.04em}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px;margin-bottom:18px}
+  label{display:block;font-size:12px;color:var(--sub);letter-spacing:.06em;
+    margin-bottom:8px;font-weight:600}
+  input[type=text],input[type=password]{width:100%;background:#0e0e12;border:1px solid var(--line);
+    color:var(--ink);border-radius:10px;padding:12px 14px;font-size:15px;outline:none}
+  input:focus{border-color:var(--accent2)}
+  .hint{font-size:11px;color:var(--sub);margin-top:6px}
+  .row{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  .drop{border:1.5px dashed #3a3a44;border-radius:14px;padding:34px 18px;text-align:center;
+    cursor:pointer;transition:.15s;background:#0e0e12}
+  .drop:hover,.drop.over{border-color:var(--accent2);background:#16161b}
+  .drop .big{font-size:15px;margin-bottom:6px}
+  .drop .small{font-size:12px;color:var(--sub)}
+  .picks{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .pick{font-size:12px;color:var(--accent2);border:1px solid var(--line);
+    padding:7px 14px;border-radius:999px;cursor:pointer;background:#101015}
+  .pick:hover{border-color:var(--accent2)}
+  .files{margin-top:16px;display:none}
+  .files.show{display:block}
+  .files h3{font-size:12px;color:var(--sub);letter-spacing:.06em;margin:0 0 8px}
+  .flist{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .frow{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px}
+  .frow:last-child{border-bottom:none}
+  .fpath{font-family:ui-monospace,monospace;color:var(--ink);word-break:break-all}
+  .fsize{color:var(--sub);font-size:11px;white-space:nowrap}
+  .fdel{color:var(--ng);cursor:pointer;font-size:12px;white-space:nowrap}
+  .btn{width:100%;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;
+    letter-spacing:.08em;cursor:pointer;background:var(--accent);color:#fff;transition:.15s}
+  .btn:hover{background:#cf3a43}
+  .btn:disabled{background:#3a2a2c;color:#7a6a6c;cursor:not-allowed}
+  .status{margin-top:16px;font-size:14px;border-radius:10px;padding:14px;display:none}
+  .status.show{display:block}
+  .status.ok{background:rgba(63,164,106,.12);border:1px solid var(--ok);color:#bfe9cf}
+  .status.err{background:rgba(196,71,79,.12);border:1px solid var(--ng);color:#f0c2c5}
+  .status a{color:var(--accent2);font-weight:700}
+  .copy{margin-left:10px;font-size:11px;border:1px solid var(--line);border-radius:6px;
+    padding:3px 8px;cursor:pointer;color:var(--ink);background:#101015}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;
+    border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite;
+    vertical-align:-2px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .preview-url{font-family:ui-monospace,monospace;color:var(--accent2);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="bar"></div><h1>未明シアター｜ドラマLP公開ツール</h1></div>
+  <p class="lead">生成したファイルを「ドラマ名フォルダ」でアップ → 数分後に自動公開されます。</p>
+
+  <div class="card">
+    <label>合言葉</label>
+    <input id="pass" type="password" placeholder="チームで共有された合言葉" autocomplete="off" />
+    <div class="hint">※ サーバー側で照合します。第三者には共有しないでください。</div>
+  </div>
+
+  <div class="card">
+    <label>公開フォルダ名（ドラマ名）</label>
+    <input id="folder" type="text" placeholder="例：oldroots / suki-soredake / 好きそれだけ" autocomplete="off" />
+    <div class="hint">公開URL → <span id="urlPreview" class="preview-url">http://codexxxx.jp/（ここ）/</span></div>
+  </div>
+
+  <div class="card">
+    <label>公開ファイル</label>
+    <div id="drop" class="drop">
+      <div class="big">ここにファイル／フォルダをドラッグ&ドロップ</div>
+      <div class="small">index.html・画像・CSS などをまとめてOK</div>
+      <div class="picks">
+        <span class="pick" id="pickFolder">📁 フォルダを選ぶ</span>
+        <span class="pick" id="pickFiles">📄 ファイルを選ぶ</span>
+      </div>
+    </div>
+    <input id="inFolder" type="file" webkitdirectory multiple hidden />
+    <input id="inFiles" type="file" multiple hidden />
+
+    <div id="files" class="files">
+      <h3>公開されるファイル（<span id="count">0</span>件・<span id="total">0</span>）</h3>
+      <div id="flist" class="flist"></div>
+    </div>
+  </div>
+
+  <button id="go" class="btn" disabled>公開する</button>
+  <div id="status" class="status"></div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let FILES = []; // {file, relPath}
+
+// ── URLプレビュー
+$('#folder').addEventListener('input', () => {
+  const v = $('#folder').value.trim() || '（ここ）';
+  $('#urlPreview').textContent = `http://codexxxx.jp/${v}/`;
+});
+
+// ── ファイル選択（ボタン）
+$('#pickFolder').onclick = () => $('#inFolder').click();
+$('#pickFiles').onclick  = () => $('#inFiles').click();
+$('#inFolder').addEventListener('change', e => addPlain([...e.target.files]));
+$('#inFiles').addEventListener('change',  e => addPlain([...e.target.files]));
+
+function addPlain(list){
+  const arr = list.map(f => ({ file:f, relPath: f.webkitRelativePath || f.name }));
+  ingest(arr);
+}
+
+// ── ドラッグ&ドロップ（フォルダ階層も再帰取得）
+const drop = $('#drop');
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.add('over');
+}));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.remove('over');
+}));
+drop.addEventListener('drop', async e => {
+  const items = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (items.length){
+    const out = [];
+    for (const it of items) await walk(it, '', out);
+    ingest(out);
+  } else {
+    addPlain([...e.dataTransfer.files]);
+  }
+});
+function walk(entry, path, out){
+  return new Promise(resolve => {
+    if (entry.isFile){
+      entry.file(f => { out.push({ file:f, relPath: path + entry.name }); resolve(); });
+    } else if (entry.isDirectory){
+      const reader = entry.createReader();
+      const all = [];
+      const read = () => reader.readEntries(async batch => {
+        if (!batch.length){
+          for (const e of all) await walk(e, path + entry.name + '/', out);
+          resolve();
+        } else { all.push(...batch); read(); }
+      });
+      read();
+    } else resolve();
+  });
+}
+
+// ── 取り込み（共通トップフォルダを剥がして重複排除）
+function ingest(arr){
+  arr = arr.filter(x => !x.file.name.startsWith('.')); // .DS_Store等を除外
+  if (!arr.length) return;
+  // 全ファイルが同じ先頭フォルダを共有していたら剥がす
+  const tops = new Set(arr.map(x => x.relPath.split('/')[0]));
+  const hasNest = arr.some(x => x.relPath.includes('/'));
+  if (tops.size === 1 && hasNest){
+    const top = [...tops][0] + '/';
+    arr = arr.map(x => ({ ...x, relPath: x.relPath.startsWith(top) ? x.relPath.slice(top.length) : x.relPath }));
+    // ドラマ名が未入力ならフォルダ名を自動補完
+    if (!$('#folder').value.trim()){ $('#folder').value = [...tops][0]; $('#folder').dispatchEvent(new Event('input')); }
+  }
+  for (const x of arr){
+    if (!x.relPath) continue;
+    if (!FILES.some(f => f.relPath === x.relPath)) FILES.push(x);
+  }
+  render();
+}
+
+function human(b){ return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB'; }
+
+function render(){
+  const box = $('#files'), list = $('#flist');
+  if (!FILES.length){ box.classList.remove('show'); $('#go').disabled = true; return; }
+  box.classList.add('show');
+  const total = FILES.reduce((s,f)=>s+f.file.size,0);
+  $('#count').textContent = FILES.length;
+  $('#total').textContent = human(total);
+  list.innerHTML = '';
+  FILES.forEach((f,i)=>{
+    const r = document.createElement('div'); r.className='frow';
+    r.innerHTML = `<span class="fpath">${f.relPath}</span>
+      <span style="display:flex;gap:10px;align-items:center">
+        <span class="fsize">${human(f.file.size)}</span>
+        <span class="fdel" data-i="${i}">削除</span></span>`;
+    list.appendChild(r);
+  });
+  list.querySelectorAll('.fdel').forEach(b=>b.onclick=()=>{ FILES.splice(+b.dataset.i,1); render(); });
+  $('#go').disabled = false;
+}
+
+// ── base64化
+function toB64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ── 公開
+$('#go').onclick = async () => {
+  const pass = $('#pass').value.trim();
+  const folder = $('#folder').value.trim();
+  const st = $('#status');
+  st.className = 'status'; st.innerHTML = '';
+  if (!pass)   return showErr('合言葉を入力してください。');
+  if (!folder) return showErr('公開フォルダ名（ドラマ名）を入力してください。');
+  if (!FILES.length) return showErr('ファイルを追加してください。');
+
+  $('#go').disabled = true;
+  $('#go').innerHTML = '<span class="spin"></span>公開処理中…';
+  try{
+    const files = [];
+    for (const f of FILES) files.push({ path: f.relPath, content: await toB64(f.file) });
+    const res = await fetch('/api/deploy', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ passcode: pass, folder, files })
+    });
+    const data = await res.json();
+    if (data.ok){
+      st.className = 'status ok show';
+      st.innerHTML = `✅ 公開しました（${data.count}ファイル / commit ${data.commit}）<br>
+        反映まで通常1〜3分です。<br>
+        🔗 <a href="${data.url}" target="_blank">${data.url}</a>
+        <span class="copy" id="cp">URLをコピー</span>`;
+      $('#cp').onclick = () => { navigator.clipboard.writeText(data.url); $('#cp').textContent='コピー済'; };
+      FILES = []; render();
+    } else {
+      showErr(data.error || '不明なエラー');
+    }
+  }catch(e){
+    showErr('通信エラー: ' + e.message);
+  }finally{
+    $('#go').disabled = false; $('#go').textContent = '公開する';
+  }
+};
+
+function showErr(msg){
+  const st = $('#status');
+  st.className = 'status err show';
+  st.textContent = '⚠ ' + msg;
+}
+</script>
+</body>
+</html>
+
