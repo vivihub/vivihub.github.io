@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>未明シアター｜公開済みLP一覧</title>
+<style>
+:root{
+--bg:#0a0a0c; --panel:#141418; --line:#26262e; --ink:#e8e6e0;
+--sub:#8a8a96; --accent:#b8323a; --accent2:#d4af37; --ok:#3fa46a; --ng:#c4474f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:40px 20px 80px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.brand .bar{width:4px;height:34px;background:var(--accent)}
+h1{font-size:22px;letter-spacing:.08em;margin:0;font-weight:700}
+.lead{color:var(--sub);font-size:13px;margin:4px 0 14px;letter-spacing:.04em}
+.navlink{display:inline-block;margin-bottom:22px;font-size:13px;font-weight:700;
+text-decoration:none;color:var(--accent2);border:1px solid var(--line);
+border-radius:999px;padding:8px 16px;background:#101015;transition:.15s;letter-spacing:.04em}
+.navlink:hover{border-color:var(--accent2);background:#16161b}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.search{flex:1;min-width:200px;background:#0e0e12;border:1px solid var(--line);
+color:var(--ink);border-radius:10px;padding:11px 14px;font-size:14px;outline:none}
+.search:focus{border-color:var(--accent2)}
+select.sort{background:#0e0e12;border:1px solid var(--line);color:var(--ink);
+border-radius:10px;padding:11px 12px;font-size:13px;outline:none;cursor:pointer}
+.reload{border:1px solid var(--line);background:#101015;color:var(--ink);
+border-radius:10px;padding:11px 16px;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+.reload:hover{border-color:var(--accent2)}
+.meta{font-size:12px;color:var(--sub);margin-bottom:16px;letter-spacing:.04em}
+.meta b{color:var(--accent2);font-weight:700}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;transition:.15s;
+text-decoration:none;color:inherit}
+.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.card .name{font-size:16px;font-weight:700;word-break:break-all;letter-spacing:.02em}
+.card .url{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent2);
+word-break:break-all}
+.card .info{display:flex;justify-content:space-between;align-items:center;
+margin-top:6px;font-size:11px;color:var(--sub)}
+.badge{border:1px solid var(--line);border-radius:999px;padding:3px 10px;
+font-size:11px;color:var(--ink);background:#0e0e12;white-space:nowrap}
+.status{margin-top:20px;font-size:14px;border-radius:10px;padding:16px;display:none}
+.status.show{display:block}
+.status.err{background:rgba(196,71,79,.12);border:1px solid var(--ng);color:#f0c2c5}
+.status.empty{background:#101015;border:1px solid var(--line);color:var(--sub);text-align:center}
+.status a{color:var(--accent2);font-weight:700}
+.skeleton{height:118px;background:linear-gradient(90deg,#141418,#1b1b21,#141418);
+background-size:200% 100%;animation:sh 1.3s ease-in-out infinite;border-radius:14px;border:1px solid var(--line)}
+@keyframes sh{to{background-position:-200% 0}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--ink);
+border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite;
+vertical-align:-2px;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.foot{margin-top:32px;font-size:11px;color:var(--sub);text-align:center;letter-spacing:.04em}
+.foot a{color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="brand"><div class="bar"></div><h1>未明シアター｜公開済みLP一覧</h1></div>
+<p class="lead">公開ツールでアップロードされたドラマLPの一覧です。カードを押すと公開ページが開きます。</p>
+<a class="navlink" href="/publish/">＋ 新しくLPを公開する（公開ツール）→</a>
+
+<div class="toolbar">
+<input id="search" class="search" type="text" placeholder="🔍 ドラマ名で絞り込み" autocomplete="off" />
+<select id="sort" class="sort">
+<option value="new">新しい順</option>
+<option value="old">古い順</option>
+<option value="name">名前順（A→Z）</option>
+</select>
+<button id="reload" class="reload">↻ 更新</button>
+</div>
+
+<div id="meta" class="meta"></div>
+<div id="grid" class="grid"></div>
+<div id="status" class="status"></div>
+
+<div class="foot">
+公開先 <a href="http://codexxxx.jp/" target="_blank" rel="noopener">codexxxx.jp</a>
+</div>
+</div>
+
+<script>
+const OWNER = 'vivihub';
+const REPO = 'vivihub.github.io';
+const PUBLIC_BASE = 'http://codexxxx.jp';
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+// LP ではないトップ階層（リポジトリ管理用ファイル/フォルダ）は一覧から除外
+const IGNORE = new Set(['functions','upload','publish','list','assets','.github','node_modules']);
+
+const $ = (s) => document.querySelector(s);
+let DATA = []; // [{name, count, date}]
+
+function fmtDate(iso){
+if(!iso) return '—';
+const d = new Date(iso);
+if(isNaN(d)) return '—';
+return new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Tokyo'}).format(d);
+}
+
+function showStatus(cls, html){
+const st = $('#status');
+st.className = 'status show ' + cls;
+st.innerHTML = html;
+}
+function clearStatus(){ $('#status').className = 'status'; $('#status').innerHTML=''; }
+
+function skeletons(n=6){
+$('#grid').innerHTML = Array.from({length:n}).map(()=>'<div class="skeleton"></div>').join('');
+}
+
+// コミット履歴から各フォルダの最終公開日・ファイル数を推定する。
+// deploy.js のコミットメッセージ形式: 「公開: <フォルダ名>（Nファイル）」
+async function fetchCommitMeta(){
+const map = {};
+// 直近 300 件（3ページ）まで遡って解析（API 制限に配慮）
+for(let page=1; page<=3; page++){
+let res;
+try{
+res = await fetch(`${API}/commits?per_page=100&page=${page}`, {headers:{'Accept':'application/vnd.github+json'}});
+}catch(e){ break; }
+if(!res.ok) break;
+const commits = await res.json();
+if(!Array.isArray(commits) || commits.length===0) break;
+const re = /公開:\s*(.+?)（\s*(\d+)\s*ファイル/;
+for(const c of commits){
+const msg = (c.commit && c.commit.message) || '';
+const m = msg.match(re);
+if(!m) continue;
+const name = m[1].trim();
+if(map[name]) continue; // 最初に出会う＝最新コミットを採用
+map[name] = { count: parseInt(m[2],10), date: c.commit.author.date || c.commit.committer.date };
+}
+if(commits.length < 100) break;
+}
+return map;
+}
+
+async function load(){
+clearStatus();
+skeletons();
+$('#meta').textContent = '読み込み中…';
+$('#reload').disabled = true;
+$('#reload').innerHTML = '<span class="spin"></span>更新中';
+try{
+const res = await fetch(`${API}/contents/`, {headers:{'Accept':'application/vnd.github+json'}});
+if(res.status === 403){
+throw new Error('rate');
+}
+if(res.status === 404){
+throw new Error('notfound');
+}
+if(!res.ok) throw new Error('http:'+res.status);
+const entries = await res.json();
+const dirs = entries
+.filter(e => e.type === 'dir')
+.map(e => e.name)
+.filter(n => !n.startsWith('.') && !IGNORE.has(n));
+
+let meta = {};
+try{ meta = await fetchCommitMeta(); }catch(e){ /* 日付は任意 */ }
+
+DATA = dirs.map(name => ({
+name,
+count: meta[name] ? meta[name].count : null,
+date: meta[name] ? meta[name].date : null,
+}));
+render();
+const now = new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tokyo'}).format(new Date());
+$('#meta').innerHTML = `公開中のLP <b>${DATA.length}</b> 件 ・ 最終取得 ${now}`;
+}catch(e){
+$('#meta').textContent = '';
+$('#grid').innerHTML = '';
+if(e.message === 'rate'){
+showStatus('err','⚠ GitHub API のアクセス制限に達しました。1時間ほど待つか、しばらくしてから「更新」を押してください。');
+}else if(e.message === 'notfound'){
+showStatus('err','⚠ 一覧データを取得できませんでした。時間をおいて「更新」を押してください。');
+}else{
+showStatus('err','⚠ 一覧を取得できませんでした（'+e.message+'）。ネットワークを確認して「更新」を押してください。');
+}
+}finally{
+$('#reload').disabled = false;
+$('#reload').textContent = '↻ 更新';
+}
+}
+
+function render(){
+const q = $('#search').value.trim().toLowerCase();
+const sort = $('#sort').value;
+let list = DATA.filter(d => !q || d.name.toLowerCase().includes(q));
+
+list.sort((a,b)=>{
+if(sort === 'name') return a.name.localeCompare(b.name,'ja');
+const ta = a.date ? new Date(a.date).getTime() : 0;
+const tb = b.date ? new Date(b.date).getTime() : 0;
+if(ta !== tb) return sort==='old' ? ta-tb : tb-ta;
+return a.name.localeCompare(b.name,'ja');
+});
+
+const grid = $('#grid');
+if(DATA.length === 0){
+grid.innerHTML = '';
+showStatus('empty','まだ公開されたLPはありません。');
+return;
+}
+clearStatus();
+if(list.length === 0){
+grid.innerHTML = '';
+showStatus('empty','「'+$('#search').value+'」に一致するLPはありません。');
+return;
+}
+grid.innerHTML = list.map(d => {
+const url = `${PUBLIC_BASE}/${encodeURIComponent(d.name)}/`;
+const badge = d.count != null ? `<span class="badge">${d.count} ファイル</span>` : '';
+return `<a class="card" href="${url}" target="_blank" rel="noopener">
+<span class="name">${escapeHtml(d.name)}</span>
+<span class="url">${PUBLIC_BASE}/${escapeHtml(d.name)}/</span>
+<span class="info"><span>公開日 ${fmtDate(d.date)}</span>${badge}</span>
+</a>`;
+}).join('');
+}
+
+function escapeHtml(s){
+return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+$('#search').addEventListener('input', render);
+$('#sort').addEventListener('change', render);
+$('#reload').addEventListener('click', load);
+
+load();
+</script>
+</body>
+</html>
