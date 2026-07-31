@@ -1,264 +1,240 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex, nofollow" />
-<title>未明シアター｜ドラマLP公開ツール</title>
-<style>
-  :root{
-    --bg:#0a0a0c; --panel:#141418; --line:#26262e; --ink:#e8e6e0;
-    --sub:#8a8a96; --accent:#b8323a; --accent2:#d4af37; --ok:#3fa46a; --ng:#c4474f;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
-    line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px}
-  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-  .brand .bar{width:4px;height:34px;background:var(--accent)}
-  h1{font-size:22px;letter-spacing:.08em;margin:0;font-weight:700}
-  .lead{color:var(--sub);font-size:13px;margin:4px 0 28px;letter-spacing:.04em}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:22px;margin-bottom:18px}
-  label{display:block;font-size:12px;color:var(--sub);letter-spacing:.06em;
-    margin-bottom:8px;font-weight:600}
-  input[type=text],input[type=password]{width:100%;background:#0e0e12;border:1px solid var(--line);
-    color:var(--ink);border-radius:10px;padding:12px 14px;font-size:15px;outline:none}
-  input:focus{border-color:var(--accent2)}
-  .hint{font-size:11px;color:var(--sub);margin-top:6px}
-  .row{display:grid;gap:18px;grid-template-columns:1fr 1fr}
-  @media(max-width:560px){.row{grid-template-columns:1fr}}
-  .drop{border:1.5px dashed #3a3a44;border-radius:14px;padding:34px 18px;text-align:center;
-    cursor:pointer;transition:.15s;background:#0e0e12}
-  .drop:hover,.drop.over{border-color:var(--accent2);background:#16161b}
-  .drop .big{font-size:15px;margin-bottom:6px}
-  .drop .small{font-size:12px;color:var(--sub)}
-  .picks{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-  .pick{font-size:12px;color:var(--accent2);border:1px solid var(--line);
-    padding:7px 14px;border-radius:999px;cursor:pointer;background:#101015}
-  .pick:hover{border-color:var(--accent2)}
-  .files{margin-top:16px;display:none}
-  .files.show{display:block}
-  .files h3{font-size:12px;color:var(--sub);letter-spacing:.06em;margin:0 0 8px}
-  .flist{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:10px}
-  .frow{display:flex;justify-content:space-between;align-items:center;gap:10px;
-    padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px}
-  .frow:last-child{border-bottom:none}
-  .fpath{font-family:ui-monospace,monospace;color:var(--ink);word-break:break-all}
-  .fsize{color:var(--sub);font-size:11px;white-space:nowrap}
-  .fdel{color:var(--ng);cursor:pointer;font-size:12px;white-space:nowrap}
-  .btn{width:100%;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;
-    letter-spacing:.08em;cursor:pointer;background:var(--accent);color:#fff;transition:.15s}
-  .btn:hover{background:#cf3a43}
-  .btn:disabled{background:#3a2a2c;color:#7a6a6c;cursor:not-allowed}
-  .status{margin-top:16px;font-size:14px;border-radius:10px;padding:14px;display:none}
-  .status.show{display:block}
-  .status.ok{background:rgba(63,164,106,.12);border:1px solid var(--ok);color:#bfe9cf}
-  .status.err{background:rgba(196,71,79,.12);border:1px solid var(--ng);color:#f0c2c5}
-  .status a{color:var(--accent2);font-weight:700}
-  .copy{margin-left:10px;font-size:11px;border:1px solid var(--line);border-radius:6px;
-    padding:3px 8px;cursor:pointer;color:var(--ink);background:#101015}
-  .spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;
-    border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite;
-    vertical-align:-2px;margin-right:8px}
-  @keyframes s{to{transform:rotate(360deg)}}
-  .preview-url{font-family:ui-monospace,monospace;color:var(--accent2);font-size:13px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未明シアター LP ジェネレーター</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="brand"><div class="bar"></div><h1>未明シアター｜ドラマLP公開ツール</h1></div>
-  <p class="lead">生成したファイルを「ドラマ名フォルダ」でアップ → 数分後に自動公開されます。</p>
 
-  <div class="card">
-    <label>合言葉</label>
-    <input id="pass" type="password" placeholder="チームで共有された合言葉" autocomplete="off" />
-    <div class="hint">※ サーバー側で照合します。第三者には共有しないでください。</div>
-  </div>
+  <!-- ========== HEADER ========== -->
+  <header class="tool-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-label">未明シアター</span>
+        <span class="brand-divider">|</span>
+        <span class="brand-sub">LP ジェネレーター</span>
+      </div>
+      <p class="header-desc">ドラマ情報を入力するだけで、洗練されたLPを自動生成</p>
+    </div>
+  </header>
 
-  <div class="card">
-    <label>公開フォルダ名（ドラマ名）</label>
-    <input id="folder" type="text" placeholder="例：oldroots / suki-soredake / 好きそれだけ" autocomplete="off" />
-    <div class="hint">公開URL → <span id="urlPreview" class="preview-url">http://codexxxx.jp/（ここ）/</span></div>
-  </div>
+  <!-- ========== MAIN TOOL ========== -->
+  <main class="tool-main">
+    <div class="tool-container">
 
-  <div class="card">
-    <label>公開ファイル</label>
-    <div id="drop" class="drop">
-      <div class="big">ここにファイル／フォルダをドラッグ&ドロップ</div>
-      <div class="small">index.html・画像・CSS などをまとめてOK</div>
-      <div class="picks">
-        <span class="pick" id="pickFolder">📁 フォルダを選ぶ</span>
-        <span class="pick" id="pickFiles">📄 ファイルを選ぶ</span>
+      <!-- STEP INDICATOR -->
+      <div class="step-indicator">
+        <div class="step active" data-step="1">
+          <div class="step-num">01</div>
+          <div class="step-label">基本情報</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active" data-step="2">
+          <div class="step-num">02</div>
+          <div class="step-label">出演者</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active" data-step="3">
+          <div class="step-num">03</div>
+          <div class="step-label">スチール写真</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active" data-step="4">
+          <div class="step-num">04</div>
+          <div class="step-label">LP生成</div>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 1: 基本情報 ===== -->
+      <section class="form-section" id="section-basic">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <h2 class="section-title">ドラマ基本情報</h2>
+        </div>
+
+        <div class="form-grid">
+          <!-- ドラマタイトル -->
+          <div class="form-group full-width">
+            <label class="form-label">ドラマタイトル <span class="required">*</span></label>
+            <input type="text" id="drama-title" class="form-input" placeholder="例：深夜の告白">
+          </div>
+
+          <!-- キャッチコピー -->
+          <div class="form-group full-width">
+            <label class="form-label">キャッチコピー</label>
+            <input type="text" id="drama-catchcopy" class="form-input" placeholder="例：あの夜、すべてが変わった。">
+          </div>
+
+          <!-- YouTube URL -->
+          <div class="form-group full-width">
+            <label class="form-label">YouTube URL</label>
+            <div class="url-input-wrap">
+              <span class="url-prefix yt"><i class="fab fa-youtube"></i></span>
+              <input type="url" id="drama-youtube" class="form-input url-input" placeholder="https://www.youtube.com/@未明シアター">
+            </div>
+          </div>
+
+          <!-- Instagram URL -->
+          <div class="form-group full-width">
+            <label class="form-label">Instagram URL</label>
+            <div class="url-input-wrap">
+              <span class="url-prefix insta"><i class="fab fa-instagram"></i></span>
+              <input type="url" id="drama-instagram" class="form-input url-input" placeholder="https://www.instagram.com/未明シアター/">
+            </div>
+          </div>
+
+          <!-- あらすじ -->
+          <div class="form-group full-width">
+            <label class="form-label">あらすじ <span class="required">*</span></label>
+            <textarea id="drama-synopsis" class="form-textarea" rows="6" placeholder="ドラマのあらすじを入力してください。2〜3段落程度が理想です。"></textarea>
+          </div>
+
+          <!-- キービジュアル -->
+          <div class="form-group full-width">
+            <label class="form-label">キービジュアル（メイン画像）<span class="required">*</span></label>
+            <div class="upload-area" id="kv-upload-area">
+              <input type="file" id="kv-upload" accept="image/*" hidden>
+              <div class="upload-placeholder" onclick="document.getElementById('kv-upload').click()">
+                <i class="fas fa-image upload-icon"></i>
+                <p class="upload-text">クリックして画像をアップロード</p>
+                <p class="upload-sub">推奨：横長（16:9）の高解像度画像</p>
+              </div>
+              <img id="kv-preview" class="upload-preview hidden" alt="キービジュアル">
+              <button class="upload-remove hidden" id="kv-remove"><i class="fas fa-times"></i> 削除</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 2: 出演者 ===== -->
+      <section class="form-section" id="section-cast">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <h2 class="section-title">出演者情報</h2>
+        </div>
+
+        <div id="cast-list">
+          <!-- JS で動的追加 -->
+        </div>
+
+        <button class="add-cast-btn" id="add-cast-btn">
+          <i class="fas fa-plus"></i> 出演者を追加する
+        </button>
+      </section>
+
+      <!-- ===== SECTION 3: スチール写真 ===== -->
+      <section class="form-section" id="section-stills">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <h2 class="section-title">ドラマ スチール写真</h2>
+        </div>
+        <p class="section-desc">ドラマのシーン写真を最大8枚までアップロードできます。</p>
+
+        <div class="stills-grid" id="stills-grid">
+          <!-- JS で動的生成 -->
+        </div>
+
+        <button class="add-still-btn" id="add-still-btn">
+          <i class="fas fa-plus"></i> スチール写真を追加（最大8枚）
+        </button>
+      </section>
+
+      <!-- ===== GENERATE BUTTON ===== -->
+      <div class="generate-area">
+        <button class="generate-btn" id="generate-btn">
+          <i class="fas fa-magic"></i>
+          LP を生成する
+        </button>
+        <p class="generate-note">入力内容をもとにLPページを自動生成します</p>
+      </div>
+
+    </div><!-- /.tool-container -->
+  </main>
+
+  <!-- ========== LP PREVIEW MODAL ========== -->
+  <div class="modal-overlay hidden" id="preview-modal">
+    <div class="modal-inner">
+      <div class="modal-toolbar">
+        <span class="modal-title"><i class="fas fa-eye"></i> LP プレビュー</span>
+        <div class="modal-actions">
+          <button class="modal-btn download-btn" id="download-btn">
+            <i class="fas fa-download"></i> HTMLをダウンロード
+          </button>
+          <button class="modal-btn close-btn" id="close-modal">
+            <i class="fas fa-times"></i> 閉じる
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <iframe id="preview-iframe" title="LP プレビュー"></iframe>
       </div>
     </div>
-    <input id="inFolder" type="file" webkitdirectory multiple hidden />
-    <input id="inFiles" type="file" multiple hidden />
-
-    <div id="files" class="files">
-      <h3>公開されるファイル（<span id="count">0</span>件・<span id="total">0</span>）</h3>
-      <div id="flist" class="flist"></div>
-    </div>
   </div>
 
-  <button id="go" class="btn" disabled>公開する</button>
-  <div id="status" class="status"></div>
-</div>
+  <!-- 画像自動圧縮パッチ: FileReader.readAsDataURL を縮小+JPEG圧縮で上書き -->
+  <script>
+  (function () {
+    var MAX_DIM   = 1600;        // 長辺の最大ピクセル数
+    var QUALITY   = 0.82;        // JPEG 品質
+    var MIN_BYTES = 200 * 1024;  // これ未満の画像は圧縮しない
 
-<script>
-const $ = (s) => document.querySelector(s);
-let FILES = []; // {file, relPath}
+    var origRead = FileReader.prototype.readAsDataURL;
 
-// ── URLプレビュー
-$('#folder').addEventListener('input', () => {
-  const v = $('#folder').value.trim() || '（ここ）';
-  $('#urlPreview').textContent = `http://codexxxx.jp/${v}/`;
-});
+    FileReader.prototype.readAsDataURL = function (file) {
+      var self = this;
+      try {
+        var isTarget = file && typeof file.type === 'string' &&
+                       /^image\/(jpeg|png|webp)$/i.test(file.type) &&
+                       file.size >= MIN_BYTES;
+        if (!isTarget) return origRead.call(self, file);
 
-// ── ファイル選択（ボタン）
-$('#pickFolder').onclick = () => $('#inFolder').click();
-$('#pickFiles').onclick  = () => $('#inFiles').click();
-$('#inFolder').addEventListener('change', e => addPlain([...e.target.files]));
-$('#inFiles').addEventListener('change',  e => addPlain([...e.target.files]));
+        var url = URL.createObjectURL(file);
+        var img = new Image();
 
-function addPlain(list){
-  const arr = list.map(f => ({ file:f, relPath: f.webkitRelativePath || f.name }));
-  ingest(arr);
-}
+        img.onload = function () {
+          try {
+            var w = img.naturalWidth, h = img.naturalHeight;
+            var scale = Math.min(1, MAX_DIM / Math.max(w, h));
+            var cw = Math.max(1, Math.round(w * scale));
+            var ch = Math.max(1, Math.round(h * scale));
+            var canvas = document.createElement('canvas');
+            canvas.width = cw; canvas.height = ch;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';               // PNG透過はJPEGで黒背景に
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.drawImage(img, 0, 0, cw, ch);
+            URL.revokeObjectURL(url);
 
-// ── ドラッグ&ドロップ（フォルダ階層も再帰取得）
-const drop = $('#drop');
-['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); drop.classList.add('over');
-}));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); drop.classList.remove('over');
-}));
-drop.addEventListener('drop', async e => {
-  const items = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
-  if (items.length){
-    const out = [];
-    for (const it of items) await walk(it, '', out);
-    ingest(out);
-  } else {
-    addPlain([...e.dataTransfer.files]);
-  }
-});
-function walk(entry, path, out){
-  return new Promise(resolve => {
-    if (entry.isFile){
-      entry.file(f => { out.push({ file:f, relPath: path + entry.name }); resolve(); });
-    } else if (entry.isDirectory){
-      const reader = entry.createReader();
-      const all = [];
-      const read = () => reader.readEntries(async batch => {
-        if (!batch.length){
-          for (const e of all) await walk(e, path + entry.name + '/', out);
-          resolve();
-        } else { all.push(...batch); read(); }
-      });
-      read();
-    } else resolve();
-  });
-}
+            var dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+            var approx  = Math.ceil((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
+            if (approx >= file.size) return origRead.call(self, file); // 圧縮で大きくなるなら原本のまま
 
-// ── 取り込み（共通トップフォルダを剥がして重複排除）
-function ingest(arr){
-  arr = arr.filter(x => !x.file.name.startsWith('.')); // .DS_Store等を除外
-  if (!arr.length) return;
-  // 全ファイルが同じ先頭フォルダを共有していたら剥がす
-  const tops = new Set(arr.map(x => x.relPath.split('/')[0]));
-  const hasNest = arr.some(x => x.relPath.includes('/'));
-  if (tops.size === 1 && hasNest){
-    const top = [...tops][0] + '/';
-    arr = arr.map(x => ({ ...x, relPath: x.relPath.startsWith(top) ? x.relPath.slice(top.length) : x.relPath }));
-    // ドラマ名が未入力ならフォルダ名を自動補完
-    if (!$('#folder').value.trim()){ $('#folder').value = [...tops][0]; $('#folder').dispatchEvent(new Event('input')); }
-  }
-  for (const x of arr){
-    if (!x.relPath) continue;
-    if (!FILES.some(f => f.relPath === x.relPath)) FILES.push(x);
-  }
-  render();
-}
-
-function human(b){ return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB'; }
-
-function render(){
-  const box = $('#files'), list = $('#flist');
-  if (!FILES.length){ box.classList.remove('show'); $('#go').disabled = true; return; }
-  box.classList.add('show');
-  const total = FILES.reduce((s,f)=>s+f.file.size,0);
-  $('#count').textContent = FILES.length;
-  $('#total').textContent = human(total);
-  list.innerHTML = '';
-  FILES.forEach((f,i)=>{
-    const r = document.createElement('div'); r.className='frow';
-    r.innerHTML = `<span class="fpath">${f.relPath}</span>
-      <span style="display:flex;gap:10px;align-items:center">
-        <span class="fsize">${human(f.file.size)}</span>
-        <span class="fdel" data-i="${i}">削除</span></span>`;
-    list.appendChild(r);
-  });
-  list.querySelectorAll('.fdel').forEach(b=>b.onclick=()=>{ FILES.splice(+b.dataset.i,1); render(); });
-  $('#go').disabled = false;
-}
-
-// ── base64化
-function toB64(file){
-  return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = () => res(String(r.result).split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-// ── 公開
-$('#go').onclick = async () => {
-  const pass = $('#pass').value.trim();
-  const folder = $('#folder').value.trim();
-  const st = $('#status');
-  st.className = 'status'; st.innerHTML = '';
-  if (!pass)   return showErr('合言葉を入力してください。');
-  if (!folder) return showErr('公開フォルダ名（ドラマ名）を入力してください。');
-  if (!FILES.length) return showErr('ファイルを追加してください。');
-
-  $('#go').disabled = true;
-  $('#go').innerHTML = '<span class="spin"></span>公開処理中…';
-  try{
-    const files = [];
-    for (const f of FILES) files.push({ path: f.relPath, content: await toB64(f.file) });
-    const res = await fetch('/api/deploy', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ passcode: pass, folder, files })
-    });
-    const data = await res.json();
-    if (data.ok){
-      st.className = 'status ok show';
-      st.innerHTML = `✅ 公開しました（${data.count}ファイル / commit ${data.commit}）<br>
-        反映まで通常1〜3分です。<br>
-        🔗 <a href="${data.url}" target="_blank">${data.url}</a>
-        <span class="copy" id="cp">URLをコピー</span>`;
-      $('#cp').onclick = () => { navigator.clipboard.writeText(data.url); $('#cp').textContent='コピー済'; };
-      FILES = []; render();
-    } else {
-      showErr(data.error || '不明なエラー');
-    }
-  }catch(e){
-    showErr('通信エラー: ' + e.message);
-  }finally{
-    $('#go').disabled = false; $('#go').textContent = '公開する';
-  }
-};
-
-function showErr(msg){
-  const st = $('#status');
-  st.className = 'status err show';
-  st.textContent = '⚠ ' + msg;
-}
-</script>
+            Object.defineProperty(self, 'result',     { configurable: true, get: function(){ return dataUrl; } });
+            Object.defineProperty(self, 'readyState', { configurable: true, get: function(){ return 2; } }); // DONE
+            self.dispatchEvent(new ProgressEvent('loadstart'));
+            self.dispatchEvent(new ProgressEvent('load'));
+            self.dispatchEvent(new ProgressEvent('loadend'));
+          } catch (e) {
+            try { URL.revokeObjectURL(url); } catch (_) {}
+            origRead.call(self, file);
+          }
+        };
+        img.onerror = function () {
+          try { URL.revokeObjectURL(url); } catch (_) {}
+          origRead.call(self, file);
+        };
+        img.src = url;
+      } catch (e) {
+        return origRead.call(self, file);
+      }
+    };
+  })();
+  </script>
+  <script src="js/app.js"></script>
 </body>
 </html>
-
