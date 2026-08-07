@@ -64,8 +64,8 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: '有効なファイルがありません。' }, 400);
 
     // 3) GitHub 設定（Cloudflare の環境変数）
-    const owner  = env.GITHUB_OWNER;
-    const repo   = env.GITHUB_REPO;
+    const owner  = env.GITHUB_OWNER || 'vivihub';
+    const repo   = env.GITHUB_REPO || 'vivihub.github.io';
     const branch = env.GITHUB_BRANCH || 'main';
     const token  = env.GITHUB_TOKEN;
     if (!owner || !repo || !token)
